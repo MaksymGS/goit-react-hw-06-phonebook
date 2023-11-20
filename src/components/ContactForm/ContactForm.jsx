@@ -1,11 +1,14 @@
 import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
+import { nanoid } from 'nanoid';
 import {
   Button,
   ErrMessage,
   StyledForm,
   StyledLabel,
 } from './ContactForm.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/contactsSlice';
 
 const formSchema = Yup.object().shape({
   name: Yup.string()
@@ -15,7 +18,17 @@ const formSchema = Yup.object().shape({
   number: Yup.number().required('* This field required'),
 });
 
-export const ContactForm = ({ onAddContacts }) => {
+export const ContactForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts);
+
+  const addContacts = objContact => {
+    if (contacts.some(contact => contact.name === objContact.name)) {
+      alert(`${objContact.name} is already in the phone book`);
+      return;
+    }
+    return dispatch(addContact({ ...objContact, id: nanoid(5) }));
+  };
   return (
     <Formik
       initialValues={{
@@ -24,7 +37,7 @@ export const ContactForm = ({ onAddContacts }) => {
       }}
       validationSchema={formSchema}
       onSubmit={(values, actions) => {
-        onAddContacts(values);
+        addContacts(values);
         actions.resetForm();
       }}
     >

@@ -1,14 +1,23 @@
-import { createStore } from 'redux';
-import { devToolsEnhancer } from '@redux-devtools/extension';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { filterReducer } from './filterSlice';
+import { contactsReducer } from './contactsSlice';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
-const initialState = {
-  account: {
-    balance: 10,
-  },
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['contacts'],
 };
+const rootReducer = combineReducers({
+  contacts: contactsReducer,
+  filter: filterReducer,
+});
 
-export const rootReducer = (state = initialState, action) => {
-  return state;
-};
-const enhancer = devToolsEnhancer();
-export const store = createStore(rootReducer, enhancer);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+});
+
+export const persistor = persistStore(store)
